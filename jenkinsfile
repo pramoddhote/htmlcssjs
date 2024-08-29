@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Git Clone') {
+            steps {
+                git 'https://github.com/Pramoddhote/htmlcssjs.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t htmlcssjs .'
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                    sh 'docker tag htmlcssjs:latest pramoddhote/htmlcssjs:latest'
+                    sh 'docker push $DOCKER_USERNAME/htmlcssjs:latest'
+                }
+            }
+        }
+
+        stage('Deploy to Minikube') {
+            steps {
+                kubernetesDeploy(
+                    kubeconfigId: 'minikube-config',
+                    configs: 'deployment.yaml service.yaml',
+                    enableConfigSubstitution: true
+                )
+            }
+        }
+    }
+}
