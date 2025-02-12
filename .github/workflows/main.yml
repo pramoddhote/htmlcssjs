@@ -42,7 +42,7 @@ jobs:
           # Get all image versions
           curl -s -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
           https://api.github.com/users/${{ github.actor }}/packages/container/myimage/versions \
-          | jq --arg LATEST_TAG "$LATEST_TAG" '.[] | select(.metadata.container.tags | index($LATEST_TAG) | not) | .id' \
+          jq --arg LATEST_TAG "$LATEST_TAG" '.[] | select((.metadata.container.tags // []) | index($LATEST_TAG) | not) | .id'
           | xargs -I {} curl -X DELETE \
           -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
           https://api.github.com/users/${{ github.actor }}/packages/container/myimage/versions/{}
