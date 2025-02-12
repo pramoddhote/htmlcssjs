@@ -40,7 +40,7 @@ jobs:
         run: |
           curl -s -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
           https://api.github.com/orgs/${{ github.repository_owner }}/packages/container/myimage/versions \
-          | jq '.[] | select(.metadata.container.tags | index("latest") | not) | .id' \
+          | jq '.[] | select(.tags | index("latest") | not) | .id' \
           | xargs -I {} curl -X DELETE \
           -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
           https://api.github.com/orgs/${{ github.repository_owner }}/packages/container/myimage/versions/{}
