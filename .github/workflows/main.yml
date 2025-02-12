@@ -30,7 +30,7 @@ jobs:
           file: ./dockerfile  
           push: true  
           tags: |
-            ghcr.io/${{ github.repository }}/myimage:${{ github.sha::7 }}  
+            ghcr.io/${{ github.repository }}/myimage:${{ github.run_number }}  
 
       - name: Post build cleanup
         run: docker image prune -f  
