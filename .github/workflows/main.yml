@@ -39,13 +39,12 @@ jobs:
       - name: Clean up old images from GHCR
         run: |
           LATEST_TAG="${{ steps.vars.outputs.short_sha }}"
-          # Get all image versions
-          curl -s -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
-          https://api.github.com/users/${{ github.actor }}/packages/container/myimage/versions \
-          jq --arg LATEST_TAG "$LATEST_TAG" '.[] | select((.metadata.container.tags // []) | index($LATEST_TAG) | not) | .id'
-          | xargs -I {} curl -X DELETE \
-          -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
-          https://api.github.com/users/${{ github.actor }}/packages/container/myimage/versions/{}
+          IMAGE_IDS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
+            https://api.github.com/users/${{ github.actor }}/packages/container/myimage/versions \
+            | jq --arg LATEST_TAG "$LATEST_TAG" '.[] | select((.metadata?.container?.tags // []) | index($LATEST_TAG) | not) | .id')
+          echo "$IMAGE_IDS" | xargs -I {} curl -X DELETE \
+            -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
+            https://api.github.com/users/${{ github.actor }}/packages/container/myimage/versions/{}
 
       - name: Post build cleanup
         run: docker image prune -f
