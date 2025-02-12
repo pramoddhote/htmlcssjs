@@ -38,9 +38,10 @@ jobs:
 
       - name: Clean up old images from GHCR
         run: |
+          LATEST_TAG="${{ steps.vars.outputs.short_sha }}"
           curl -s -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
           https://api.github.com/orgs/${{ github.repository_owner }}/packages/container/myimage/versions \
-          | jq '.[] | select(.tags | index("latest") | not) | .id' \
+          | jq --arg LATEST_TAG "$LATEST_TAG" '.[] | select((.metadata.container.tags | index($LATEST_TAG)) | not) | .id' \
           | xargs -I {} curl -X DELETE \
           -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
           https://api.github.com/orgs/${{ github.repository_owner }}/packages/container/myimage/versions/{}
