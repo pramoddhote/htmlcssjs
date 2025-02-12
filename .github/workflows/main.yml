@@ -34,11 +34,12 @@ jobs:
 
       - name: Delete old Docker images from GHCR
         run: |
-          curl -s -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
-          https://api.github.com/users/${{ github.repository_owner }}/packages/container/myimage/versions \
-          | jq '.[].id' | tail -n +2 | xargs -I {} curl -X DELETE \
-          -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
-          https://api.github.com/users/${{ github.repository_owner }}/packages/container/myimage/versions/{}
+           curl -s -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
+           https://api.github.com/orgs/${{ github.actor }}/packages/container/myimage/versions \
+           | jq '.[] | select(.metadata.container.tags | index("latest") | not) | .id' \
+           | xargs -I {} curl -X DELETE \
+           -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
+           https://api.github.com/orgs/${{ github.actor }}/packages/container/myimage/versions/{}
 
       - name: Post build cleanup
         run: docker image prune -f
