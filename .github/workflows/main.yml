@@ -1,34 +1,25 @@
-name: Build, Push, and Clean up Docker Images in GHCR
+name: Build, Push, and Test GHCR Image Cleanup
 
 on:
-  workflow_dispatch:
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - master
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Get short commit SHA
       - name: Get short SHA
         id: vars
         run: echo "::set-output name=short_sha::$(echo ${{ github.sha }} | cut -c1-7)"
 
-      # Install GitHub CLI (gh)
-      - name: Install GitHub CLI
-        run: sudo apt-get install gh -y
-
-      # Log in to GitHub Container Registry
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -36,7 +27,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.PAT_GITHUB }}
 
-      # Build and push the Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -47,29 +37,12 @@ jobs:
             ghcr.io/${{ github.repository }}/myimage:${{ steps.vars.outputs.short_sha }}
             ghcr.io/${{ github.repository }}/myimage:latest
 
-      # Clean up old Docker images from GitHub Container Registry
-      - name: Clean up old Docker images
+      - name: List GHCR Image Versions
         run: |
-          ghcr_repo="${{ github.repository }}/myimage"
-          images_to_keep=3
-
-          # Fetch all image version IDs from GHCR
-          version_ids=$(gh api -X GET "repos/${{ github.repository_owner }}/${{ github.repository }}/packages/container/${ghcr_repo}/versions" \
-          --jq '.[].id')
-
-          # Only delete if we have more than the allowed number of images
-          if [ "$(echo "$version_ids" | wc -l)" -gt "$images_to_keep" ]; then
-            versions_to_delete=$(echo "$version_ids" | tail -n +$(($images_to_keep + 1)))
-
-            for version_id in $versions_to_delete; do
-              echo "Deleting image version ID: $version_id"
-              gh api -X DELETE "repos/${{ github.repository_owner }}/${{ github.repository }}/packages/container/${ghcr_repo}/versions/$version_id"
-            done
-          else
-            echo "No images to delete, fewer than $images_to_keep versions present."
+          gh api -X GET "/orgs/${{ github.repository_owner }}/packages/container/myimage/versions" \
+          --jq '.[].id'
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
 
-      # Post build cleanup - Docker image prune
-      - name: Post build cleanup
+      - name: Post build cleanup - Docker image prune
         run: docker image prune -f
