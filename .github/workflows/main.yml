@@ -24,6 +24,10 @@ jobs:
         id: vars
         run: echo "::set-output name=short_sha::$(echo ${{ github.sha }} | cut -c1-7)"
 
+      # Install GitHub CLI (gh)
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
       # Log in to GitHub Container Registry
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
