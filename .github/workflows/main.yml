@@ -39,7 +39,7 @@ jobs:
           file: ./dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/htmlcssjs/myimage:${{ steps.vars.outputs.short_sha }}
+            ghcr.io/${{ github.actor }}/htmlcssjs/myimage:${{ steps.vars.outputs.short_sha }}
 
       # Post build cleanup - Docker image prune
       - name: Post build cleanup
@@ -50,6 +50,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
         run: |
-          gh api /users/${GITHUB_REPOSITORY_OWNER}/packages/container/${GITHUB_REPOSITORY}%2Fmyimage/versions \
-            --jq '.[] | .id' | tail -n +4 | xargs -I {} gh api /users/${GITHUB_REPOSITORY_OWNER}/packages/container/${GITHUB_REPOSITORY}%2Fmyimage/versions/{} -X DELETE \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}"
+          gh api /users/${{ github.actor }}/packages/container/${{ github.repository_name }}%2Fmyimage/versions \
+            --jq '.[] | .id' | tail -n +4 | xargs -I {} gh api /users/${{ github.actor }}/packages/container/${{ github.repository_name }}%2Fmyimage/versions/{} -X DELETE \
+            -H "Authorization: Bearer ${PAT_GITHUB}"
