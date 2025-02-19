@@ -39,7 +39,7 @@ jobs:
 
       - name: List GHCR Image Versions
         run: |
-          gh api -X GET "/orgs/${{ github.repository_owner }}/packages/container/myimage/versions" \
+          gh api -X GET "/users/${{ github.repository_owner }}/packages/container/myimage/versions" \
           --jq '.[].id'
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
