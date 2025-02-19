@@ -52,4 +52,4 @@ jobs:
         run: |
           gh api /users/${{ github.actor }}/packages/container/htmlcssjs%2Fmyimage/versions \
             --jq '.[] | .id' | tail -n +4 | xargs -I {} gh api /users/${{ github.actor }}/packages/container/htmlcssjs%2Fmyimage/versions/{} -X DELETE \
-            -H "Authorization: Bearer ${PAT_GITHUB}"
+            -H "Authorization: Bearer ${GITHUB_TOKEN}"
