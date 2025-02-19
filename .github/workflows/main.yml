@@ -46,12 +46,10 @@ jobs:
         run: docker image prune -f
 
       # Clean up old images, keeping only the latest 3
-      - name: Clean up old images, keeping only the latest 3
+      - name: Delete old versions
         env:
-          GH_TOKEN: ${{ secrets.PAT_GITHUB }}  # Use PAT for cleanup operations as well
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
         run: |
-          versions=$(gh api -X GET "/users/${{ github.repository_owner }}/packages/container/${{ github.repository }}%2Fmyimage/versions" --jq '.[].id')
-          echo "$versions" | tail -n +4 | while read -r version_id; do
-            echo "Deleting version: $version_id"
-            gh api -X DELETE "/users/${{ github.repository_owner }}/packages/container/${{ github.repository }}%2Fmyimage/versions/$version_id"
-          done
+          gh api /users/${GITHUB_REPOSITORY_OWNER}/packages/container/${GITHUB_REPOSITORY}%2Fmyimage/versions \
+            --jq '.[] | .id' | tail -n +4 | xargs -I {} gh api /users/${GITHUB_REPOSITORY_OWNER}/packages/container/${GITHUB_REPOSITORY}%2Fmyimage/versions/{} -X DELETE \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}"
