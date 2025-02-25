@@ -50,7 +50,7 @@ jobs:
       - name: Post build cleanup
         run: docker image prune -af
 
-      # Clean up old images, keeping only the latest 3
+      # Clean up old images, keeping only the latest 
       - name: Delete old versions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
