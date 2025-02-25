@@ -44,7 +44,7 @@ jobs:
           file: ./dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.actor }}/htmlcssjs/${{ env.IMAGE_NAME }}:${{ env.short_sha }}
+            ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.short_sha }}
 
       # Post build cleanup - Docker image prune
       - name: Post build cleanup
