@@ -51,5 +51,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
         run: |
           gh api /users/${{ github.actor }}/packages/container/htmlcssjs%2Fmyimage/versions \
-            --jq '.[] | .id' | tail -n +4 | xargs -I {} gh api /users/${{ github.actor }}/packages/container/htmlcssjs%2Fmyimage/versions/{} -X DELETE \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}"
+          --jq '[.[] | select(.metadata.container.tags[] | test("^[a-zA-Z0-9]+$"))] | .[].id' \
+          | tail -n +4 \
+          | xargs -I {} gh api /users/${{ github.actor }}/packages/container/htmlcssjs%2Fmyimage/versions/{} -X DELETE \
+          -H "Authorization: Bearer ${GITHUB_TOKEN}"
+
