@@ -44,8 +44,8 @@ jobs:
           file: ./dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.short_sha }}
             ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ env.short_sha }}
 
       # Post build cleanup - Docker image prune
       - name: Post build cleanup
@@ -58,7 +58,7 @@ jobs:
         run: |
           gh api /users/${{ github.actor }}/packages/container/htmlcssjs%2F${{ env.IMAGE_NAME }}/versions \
           --jq '[.[]] | .[].id' \
-          | tail -n +7 \
+          | tail -n +17 \
           | xargs -I {} gh api /users/${{ github.actor }}/packages/container/htmlcssjs%2F${{ env.IMAGE_NAME }}/versions/{} -X DELETE \
           -H "Authorization: Bearer ${GITHUB_TOKEN}"
 
