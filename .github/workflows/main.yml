@@ -58,7 +58,7 @@ jobs:
         run: |
           gh api /users/${{ github.actor }}/packages/container/htmlcssjs%2F${{ env.IMAGE_NAME }}/versions \
           --jq '[.[]] | .[].id' \
-          | tail -n +4 \
+          | tail -n +7 \
           | xargs -I {} gh api /users/${{ github.actor }}/packages/container/htmlcssjs%2F${{ env.IMAGE_NAME }}/versions/{} -X DELETE \
           -H "Authorization: Bearer ${GITHUB_TOKEN}"
 
